@@ -26,6 +26,8 @@ let renderer = new THREE.WebGLRenderer({
 })
 renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.gammaOutput = true
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
 document.body.appendChild(renderer.domElement)
 
 //Camera Controls
@@ -35,26 +37,70 @@ controls.campingFactor = 0.25
 controls.enableZoom = true
 
 //Light
-let dirLight = new THREE.DirectionalLight(0xffffff, 0.7)
-dirLight.position.set(150, 150, -150)
-// dirLight.castShadow = true
-// dirLight.shadow = new THREE.LightShadow(followCamera)
-// dirLight.shadow.bias = 0.0001
-// dirLight.shadow.mapSize.height = 1024
-// dirLight.shadow.mapSize.width = 1024
+let dirLight = new THREE.DirectionalLight(0xffffff, 1)
+dirLight.position.set(300, 300, -300)
+dirLight.castShadow = true
+
+//dirLight.shadow.bias = 0.001
+dirLight.shadow.mapSize.width = 1024
+dirLight.shadow.mapSize.height = 1024
+dirLight.shadow.camera.near = 1
+dirLight.shadow.camera.far = 1000
+dirLight.shadow.camera.left = -300
+dirLight.shadow.camera.right = 300
+dirLight.shadow.camera.top = -300
+dirLight.shadow.camera.bottom = 300
+//dirLight.shadow.radius = 1.5
+
 scene.add(dirLight)
 
-let ambLight = new THREE.AmbientLight(0xffffff, 0.4)
+let ambLight = new THREE.AmbientLight(0xffffff, 0.0)
 ambLight.position.set(200, 200, 200)
 scene.add(ambLight)
 
 //Objects
 let car = carMethods.createCar(scene)
 car.body.add(followCamera)
-const table = loader.loadObject("../models/table/table.mtl", "../models/table/table.obj")
-scene.add(table)
 
-scene.add(new THREE.GridHelper(1000, 10))
+const groundMaterial = new THREE.MeshPhongMaterial({
+    color: 0x3C3C3C
+});
+const plane = new THREE.Mesh(new THREE.PlaneGeometry(500, 500), groundMaterial);
+plane.rotation.x = -Math.PI / 2;
+plane.receiveShadow = true;
+
+scene.add(plane);
+
+// let table = loader.loadObject("../models/table/table.mtl", "../models/table/table.obj")
+// table.scale.set(5, 5, 5)
+// scene.add(table)
+
+let butters = []
+
+butters.push(loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj"))
+butters[0].position.set(200, 2, 50)
+butters[0].rotateY(Math.PI / 2)
+scene.add(butters[0])
+
+butters.push(loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj"))
+butters[1].position.set(-200, 2, 50)
+butters[1].rotateY(Math.PI / 2)
+scene.add(butters[1])
+
+butters.push(loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj"))
+butters[2].position.set(0, 2, -200)
+butters[2].rotateY(Math.PI / 2)
+scene.add(butters[2])
+
+for (let i = 0; i < 100; i++) {
+    const angle = 3.6 * i;
+    const x = 300 * Math.cos(angle)
+    const z = 300 * Math.sin(angle)
+
+    const cheerio = loader.loadObject("../models/cheerio/cheerio.mtl", "../models/cheerio/cheerio.obj")
+    cheerio.position.set(x, 1, z)
+    scene.add(cheerio)
+}
 
 //Keyboard Input
 document.body.addEventListener("keydown", event => {
