@@ -63,8 +63,6 @@ function createCar(scene) {
     car.name = "Car"
     car.scale.set(0.05, 0.05, 0.05)
 
-    console.log(car)
-
     scene.add(car)
 
     return {
