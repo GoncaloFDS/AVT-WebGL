@@ -9,7 +9,7 @@ let clock = new THREE.Clock()
 
 //Camera
 let followCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100000)
-followCamera.position.set(30, 30, 30)
+followCamera.position.set(400, 200, -300)
 const orthoCamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 0.1, 100000)
 orthoCamera.position.set(0, 50, 0)
 const topCamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 0.1, 100000)
@@ -44,15 +44,14 @@ dirLight.castShadow = true
 dirLight.shadow.mapSize.width = 8192
 dirLight.shadow.mapSize.height = 8192
 dirLight.shadow.camera.near = 1
-dirLight.shadow.camera.far = 1000
-dirLight.shadow.camera.left = -300
-dirLight.shadow.camera.right = 300
+dirLight.shadow.camera.far = 590
+dirLight.shadow.camera.left = -350
+dirLight.shadow.camera.right = 350
 dirLight.shadow.camera.top = -300
 dirLight.shadow.camera.bottom = 300
 dirLight.shadow.bias = -0.001
 dirLight.shadow.radius = 0.5
 
-scene.add(new THREE.CameraHelper(dirLight.shadow.camera))
 scene.add(dirLight)
 
 let ambLight = new THREE.AmbientLight(0xffffff, 0.05)

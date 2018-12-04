@@ -63,8 +63,7 @@ function createCar(scene) {
     car.name = "Car"
     car.scale.set(0.05, 0.05, 0.05)
 
-    scene.add(new THREE.CameraHelper(spotLightL.shadow.camera))
-    scene.add(new THREE.CameraHelper(spotLightR.shadow.camera))
+    console.log(car)
 
     scene.add(car)
 
