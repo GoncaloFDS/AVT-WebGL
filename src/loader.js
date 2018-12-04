@@ -1,6 +1,6 @@
-function loadObject(mtl_path, obj_path) {
+function loadObject(mtl_path, obj_path, castShadow, receiveShadow) {
 
-    let object = new THREE.Object3D()
+    let object = new THREE.Group()
     let mtlLoader = new THREE.MTLLoader()
     let objLoader = new THREE.OBJLoader()
 
@@ -11,20 +11,13 @@ function loadObject(mtl_path, obj_path) {
     mtlLoader.load(mtl_path, materials => {
         materials.preload()
         objLoader.setMaterials(materials)
-        objLoader.load(obj_path, obj => object.add(obj))
-    })
-
-    object.traverse(node => {
-
-        if (node instanceof THREE.Object3D) {
-            node.castShadow = true
-            node.receiveShadow = true
-        }
-    })
-
-    object.traverse(node => {
-
-        console.log(node.receiveShadow && node.castShadow)
+        objLoader.load(obj_path, obj => obj.traverse(node => {
+            if (node instanceof THREE.Mesh) {
+                node.castShadow = castShadow
+                node.receiveShadow = receiveShadow
+                object.add(node)
+            }
+        }))
     })
 
     return object
