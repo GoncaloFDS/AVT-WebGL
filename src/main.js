@@ -1,5 +1,5 @@
 import loader from "./loader.js";
-import carMethods from "./car.js";
+import Car from "./car.js"
 
 //Scene
 let scene = new THREE.Scene()
@@ -59,7 +59,7 @@ ambLight.position.set(200, 200, 200)
 scene.add(ambLight)
 
 //Objects
-let car = carMethods.createCar(scene)
+let car = new Car(scene);
 car.body.add(followCamera)
 
 let table = loader.loadObject("../models/table/table.mtl", "../models/table/table.obj", false, true)
