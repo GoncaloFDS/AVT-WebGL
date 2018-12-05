@@ -59,8 +59,8 @@ function createLights(scene) {
 
     let sun = new THREE.Mesh(new THREE.PlaneGeometry(150, 150), new THREE.MeshBasicMaterial({
         map: textureLoader.load("../models/lens flare/sun.png"),
-        transparent: true
-
+        transparent: true,
+        
     }))
     sun.position.set(0, 200, 200)
     sun.add(dirLight)
