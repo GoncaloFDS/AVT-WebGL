@@ -1,24 +1,20 @@
 'use strict'
-import {
-    SceneNode
-} from "./sceneNode.js"
 
 import loader from "./loader.js"
 
-export class Car extends SceneNode {
+export default class Car extends THREE.Group{
     constructor() {
-        super();
-        this.moving = 0;
-        this.rotating = 0;
+        super()
+
         //Right SpotLight
         this.spotLightR = new THREE.SpotLight(0xffffff, 2)
         this.spotLightR.decay = 2
         this.spotLightR.penumbra = 0.65
-        // spotLightR.castShadow = true
-        // spotLightR.shadow.camera.fov = 30
-        // spotLightR.shadow.mapSize.width = 2048
-        // spotLightR.shadow.mapSize.height = 2048
-        this.spotLightR.position.set(60, 50, 200)
+        this.spotLightR.castShadow = true
+        this.spotLightR.shadow.camera.fov = 30
+        this.spotLightR.shadow.mapSize.width = 2048
+        this.spotLightR.shadow.mapSize.height = 2048
+        this.spotLightR.position.set(60, 50, 240)
         this.spotLightR.target = new THREE.Object3D()
         this.spotLightR.target.position.set(80, 50, 50000)
         this.spotLightR.target.updateMatrixWorld()
@@ -29,11 +25,11 @@ export class Car extends SceneNode {
         this.spotLightL = new THREE.SpotLight(0xffffff, 2)
         this.spotLightL.decay = 2
         this.spotLightL.penumbra = 0.65
-        // spotLightL.castShadow = true
-        // spotLightL.shadow.camera.fov = 30
-        // spotLightL.shadow.mapSize.width = 2048
-        // spotLightL.shadow.mapSize.height = 2048
-        this.spotLightL.position.set(-60, 50, 200)
+        this.spotLightL.castShadow = true
+        this.spotLightL.shadow.camera.fov = 30
+        this.spotLightL.shadow.mapSize.width = 2048
+        this.spotLightL.shadow.mapSize.height = 2048
+        this.spotLightL.position.set(-60, 50, 240)
         this.spotLightL.target = new THREE.Object3D()
         this.spotLightL.target.position.set(-80, 50, 50000)
         this.spotLightL.target.updateMatrixWorld()
@@ -72,10 +68,12 @@ export class Car extends SceneNode {
         this.model.name = "Car"
         this.model.scale.set(0.05, 0.05, 0.05)
 
-        this.speed = 0;
-        this.acceleration = 1;
-        this.life = 5;
-        this.turn_speed = 1;
+        this.speed = 0
+        this.acceleration = 1
+        this.life = 5
+        this.turn_speed = 1
+        this.moving = 0
+        this.rotating = 0
     }
 
 
@@ -92,14 +90,12 @@ export class Car extends SceneNode {
         if (this.speed > 2.5) this.speed = 2.5
         else if (this.speed < -2.5) this.speed = -2.5
         this.translateZ(amount)
-        //this.updateMatrixWorld()
     }
 
     rotate(amount, deltaTime) {
 
         const rot = this.turn_speed * amount * deltaTime
         this.rotateY(rot)
-        //this.updateMatrixWorld()
     }
 
     reset() {

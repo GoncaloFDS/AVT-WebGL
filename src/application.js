@@ -1,30 +1,24 @@
 'use strict'
 import loader from "./loader.js"
-import {
-    Car
-} from "./car.js"
-import {
-    Lights
-} from "./light.js"
-import {
-    ParticleSystem
-} from "./particles.js"
+import Car from "./car.js"
+import Lights from "./light.js"
+import ParticleSystem from "./particles.js"
 
-var currentCamera, scene, renderer, clock
-var followCamera, orthoCamera, topCamera
-var controls
-var worldWidth = 1400
-var worldHeight = 700
-var car
+let currentCamera, scene, renderer, clock
+let followCamera, orthoCamera, topCamera
+let controls
+let worldWidth = 1400
+let worldHeight = 700
 let lights
 let stats
 let particles
+let car, cheerios, butters, table
 
 function init() {
     //Scene
     scene = new THREE.Scene()
     scene.background = new THREE.Color(0x0)
-    scene.fog = new THREE.FogExp2(0x333333, 0.0005)
+    scene.fog = new THREE.FogExp2(0xaaaaaa, 0.015)
 
     //Clock
     clock = new THREE.Clock()
@@ -49,7 +43,7 @@ function init() {
     controls.enableDamping = true
     controls.campingFactor = 0.25
     controls.enablePan = false;
-    controls.enableZoom = true;
+    controls.enableZoom = false;
 
     //Evens
     window.addEventListener("keydown", onKeyDown);
@@ -63,35 +57,44 @@ function init() {
 
 function createScene() {
 
+    lights = new Lights()
+    scene.add(lights)
+
+    //Car
     car = new Car()
     scene.add(car)
 
-    lights = new Lights(scene)
-
-    let table = loader.loadObject("../models/table/table.mtl", "../models/table/table.obj", false, true)
+    //Table
+    table = loader.loadObject("../models/table/table.mtl", "../models/table/table.obj", false, true)
     table.scale.set(5, 5, 5)
     table.name = "Table"
     scene.add(table)
 
-    let butters = []
+    //Butters
+    butters = new THREE.Group()
 
-    butters.push(loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false))
-    butters[0].position.set(200, 2, 50)
-    butters[0].rotateY(Math.PI / 2)
-    butters[0].name = "Butter_0"
-    scene.add(butters[0])
+    let butter = loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
+    butter.position.set(200, 2, 50)
+    butter.rotateY(Math.PI / 2)
+    butter.name = "Butter_0"
+    butters.add(butter)
 
-    butters.push(loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false))
-    butters[1].position.set(-200, 2, 50)
-    butters[1].rotateY(Math.PI / 2)
-    butters[1].name = "Butter_1"
-    scene.add(butters[1])
+    butter = loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
+    butter.position.set(-200, 2, 50)
+    butter.rotateY(Math.PI / 2)
+    butter.name = "Butter_1"
+    butters.add(butter)
 
-    butters.push(loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false))
-    butters[2].position.set(0, 2, -200)
-    butters[2].rotateY(Math.PI / 2)
-    butters[2].name = "Butter_2"
-    scene.add(butters[2])
+    butter = loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
+    butter.position.set(0, 2, -200)
+    butter.rotateY(Math.PI / 2)
+    butter.name = "Butter_2"
+    butters.add(butter)
+
+    scene.add(butters)
+
+    //Cheerios
+    cheerios = new THREE.Group()
 
     for (let i = 0; i < 100; i++) {
         const angle = 3.6 * i;
@@ -101,8 +104,10 @@ function createScene() {
         const cheerio = loader.loadObject("../models/cheerio/cheerio.mtl", "../models/cheerio/cheerio.obj", true, false)
         cheerio.position.set(x, 1, z)
         cheerio.name = "Cheerio_" + i
-        scene.add(cheerio)
+        cheerios.add(cheerio)
     }
+
+    scene.add(cheerios)
 
     //Particle System
     particles = new ParticleSystem(renderer, scene, followCamera)
