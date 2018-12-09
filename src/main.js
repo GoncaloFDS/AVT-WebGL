@@ -1,11 +1,12 @@
 import loader from "./loader.js";
 import carMethods from "./car.js";
-import lightMethods from "./light.js";
+import {Lights } from "./light.js";
+import { ParticleSystem } from "./particles.js"
 
 //Scene
 let scene = new THREE.Scene()
 scene.background = new THREE.Color(0x0)
-scene.fog = new THREE.FogExp2(0x333333, 0.0005)
+//scene.fog = new THREE.FogExp2(0x333333, 0.0005)
 
 //Clock
 let clock = new THREE.Clock()
@@ -13,14 +14,14 @@ let clock = new THREE.Clock()
 //Camera
 let followCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100000)
 followCamera.position.set(400, 200, -300)
+followCamera.lookAt(scene.position)
+
 const orthoCamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 0.1, 100000)
 orthoCamera.position.set(0, 90, 0)
 const topCamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 0.1, 100000)
 topCamera.position.set(0, 180, 0)
-let currentCamera = followCamera
 
-followCamera.lookAt(scene.position)
-//scene.add(followCamera)
+let currentCamera = followCamera
 
 //Renderer
 let renderer = new THREE.WebGLRenderer({
@@ -41,47 +42,7 @@ controls.campingFactor = 0.25
 controls.enableZoom = true
 
 //Lights
-let lights = lightMethods.createLights(scene)
-
-//Particle System
-let proton = new Proton()
-let emitter = new Proton.Emitter()
-
-emitter.rate = new Proton.Rate(new Proton.Span(280, 350), new Proton.Span(.2, .5));
-emitter.addInitialize(new Proton.Mass(1));
-emitter.addInitialize(new Proton.Radius(new Proton.Span(10, 20)));
-
-let proton_position = new Proton.Position();
-proton_position.addZone(new Proton.BoxZone(400, 50, 400));
-emitter.addInitialize(proton_position);
-emitter.addInitialize(new Proton.Life(3, 6));
-emitter.addInitialize(new Proton.Body(createSnow()));
-emitter.addInitialize(new Proton.Velocity(0, new Proton.Vector3D(0, -0.5, 0), 90));
-emitter.addBehaviour(new Proton.RandomDrift(10, 1, 10, .05));
-emitter.addBehaviour(new Proton.Rotate("random", "random"));
-emitter.addBehaviour(new Proton.Gravity(2));
-
-let particleCamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 1, 3000)
-particleCamera.position.z = 500
-
-let sceenZone = new Proton.ScreenZone(particleCamera, renderer, 20, "234");
-emitter.addBehaviour(new Proton.CrossZone(sceenZone, "dead"));
-emitter.p.x = 0;
-emitter.p.y = 100;
-emitter.emit();
-proton.addEmitter(emitter);
-proton.addRender(new Proton.SpriteRender(scene));
-
-function createSnow() {
-    var map = new THREE.TextureLoader().load("../models/snow.png");
-    var material = new THREE.SpriteMaterial({
-        map: map,
-        transparent: true,
-        opacity: .5,
-        color: 0xffffff
-    });
-    return new THREE.Sprite(material);
-}
+let lights = new Lights(scene)
 
 //Objects
 let car = carMethods.createCar(scene)
@@ -122,6 +83,9 @@ for (let i = 0; i < 100; i++) {
     cheerio.name = "Cheerio_" + i
     scene.add(cheerio)
 }
+
+//Particle System
+let particles = new ParticleSystem(renderer, scene, followCamera)
 
 //Keyboard Input
 document.body.addEventListener("keydown", event => {
@@ -184,11 +148,9 @@ function loop() {
 //Update
 function onUpdate() {
 
-    proton.update()
-    controls.update()
-    followCamera.lookAt(car.body.position)
-    lights.sun.lookAt(followCamera.position)
-    Proton.Debug.renderInfo(proton, 3);
     stats.update()
+    controls.update()
+    particles.OnUpdate()
 
+    followCamera.lookAt(car.body.position)
 }
