@@ -1,115 +1,115 @@
-import loader from "./loader.js";
+'use strict'
+import {
+    SceneNode
+} from "./sceneNode.js"
 
-function createCar(scene) {
+import loader from "./loader.js"
 
-    //Right SpotLight
-    let spotLightR = new THREE.SpotLight(0xffffff, 2)
-    spotLightR.decay = 2
-    spotLightR.penumbra = 0.65
-    // spotLightR.castShadow = true
-    // spotLightR.shadow.camera.fov = 30
-    // spotLightR.shadow.mapSize.width = 2048
-    // spotLightR.shadow.mapSize.height = 2048
-    spotLightR.position.set(60, 50, 200)
-    spotLightR.target = new THREE.Object3D()
-    spotLightR.target.position.set(80, 50, 50000)
-    spotLightR.target.updateMatrixWorld()
-    spotLightR.add(spotLightR.target)
-    spotLightR.name = "SpotLightR"
+export class Car extends SceneNode {
+    constructor() {
+        super();
+        this.moving = 0;
+        this.rotating = 0;
+        //Right SpotLight
+        this.spotLightR = new THREE.SpotLight(0xffffff, 2)
+        this.spotLightR.decay = 2
+        this.spotLightR.penumbra = 0.65
+        // spotLightR.castShadow = true
+        // spotLightR.shadow.camera.fov = 30
+        // spotLightR.shadow.mapSize.width = 2048
+        // spotLightR.shadow.mapSize.height = 2048
+        this.spotLightR.position.set(60, 50, 200)
+        this.spotLightR.target = new THREE.Object3D()
+        this.spotLightR.target.position.set(80, 50, 50000)
+        this.spotLightR.target.updateMatrixWorld()
+        this.spotLightR.add(this.spotLightR.target)
+        this.spotLightR.name = "SpotLightR"
 
-    //Left SpotLight
-    let spotLightL = new THREE.SpotLight(0xffffff, 2)
-    spotLightL.decay = 2
-    spotLightL.penumbra = 0.65
-    // spotLightL.castShadow = true
-    // spotLightL.shadow.camera.fov = 30
-    // spotLightL.shadow.mapSize.width = 2048
-    // spotLightL.shadow.mapSize.height = 2048
-    spotLightL.position.set(-60, 50, 200)
-    spotLightL.target = new THREE.Object3D()
-    spotLightL.target.position.set(-80, 50, 50000)
-    spotLightL.target.updateMatrixWorld()
-    spotLightL.add(spotLightL.target)
-    spotLightL.name = "SpotLightL"
+        //Left SpotLight
+        this.spotLightL = new THREE.SpotLight(0xffffff, 2)
+        this.spotLightL.decay = 2
+        this.spotLightL.penumbra = 0.65
+        // spotLightL.castShadow = true
+        // spotLightL.shadow.camera.fov = 30
+        // spotLightL.shadow.mapSize.width = 2048
+        // spotLightL.shadow.mapSize.height = 2048
+        this.spotLightL.position.set(-60, 50, 200)
+        this.spotLightL.target = new THREE.Object3D()
+        this.spotLightL.target.position.set(-80, 50, 50000)
+        this.spotLightL.target.updateMatrixWorld()
+        this.spotLightL.add(this.spotLightL.target)
+        this.spotLightL.name = "SpotLightL"
 
-    //Car Wheels
-    let wheels = []
-    wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
-    wheels[0].name = "WheelRF"
-    wheels[0].position.set(-85.429, 34.599, 128.173)
-    wheels[0].rotation.y = Math.PI
+        //Car Wheels
+        this.wheels = []
+        this.wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
+        this.wheels[0].name = "WheelRF"
+        this.wheels[0].position.set(-85.429, 34.599, 128.173)
+        this.wheels[0].rotation.y = Math.PI
 
-    wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
-    wheels[1].name = "WheelLF"
-    wheels[1].position.set(85.429, 34.599, 128.173)
+        this.wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
+        this.wheels[1].name = "WheelLF"
+        this.wheels[1].position.set(85.429, 34.599, 128.173)
 
-    wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
-    wheels[2].name = "WheelRB"
-    wheels[2].position.set(-85.429, 36.416, -146.734)
-    wheels[2].rotation.y = Math.PI
+        this.wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
+        this.wheels[2].name = "WheelRB"
+        this.wheels[2].position.set(-85.429, 36.416, -146.734)
+        this.wheels[2].rotation.y = Math.PI
 
-    wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
-    wheels[3].name = "WheelLB"
-    wheels[3].position.set(85.429, 36.416, -146.734)
+        this.wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
+        this.wheels[3].name = "WheelLB"
+        this.wheels[3].position.set(85.429, 36.416, -146.734)
 
-    //Car Body
-    let car = loader.loadObject("../models/Lamborginhi/Body.mtl", "../models/Lamborginhi/Body.obj", true, true)
-    car.add(wheels[0])
-    car.add(wheels[1])
-    car.add(wheels[2])
-    car.add(wheels[3])
-    car.add(spotLightR)
-    car.add(spotLightL)
-    car.name = "Car"
-    car.scale.set(0.05, 0.05, 0.05)
+        //Car Body
+        this.model = loader.loadObject("../models/Lamborginhi/Body.mtl", "../models/Lamborginhi/Body.obj", true, true)
+        this.add(this.model);
+        this.model.add(this.wheels[0])
+        this.model.add(this.wheels[1])
+        this.model.add(this.wheels[2])
+        this.model.add(this.wheels[3])
+        this.model.add(this.spotLightR)
+        this.model.add(this.spotLightL)
+        this.model.name = "Car"
+        this.model.scale.set(0.05, 0.05, 0.05)
 
-    scene.add(car)
-
-    return {
-        body: car,
-        wheels: wheels,
-        spotLightL: spotLightL,
-        spotLightR: spotLightR,
-        speed: 0,
-        acceleration: 1,
-        life: 5,
-        turn_speed: 0.5
-    }
-}
-
-function move(car, amount, clock) {
-
-    if (car.speed * amount > 0) car.speed += amount * car.acceleration * clock.getDelta()
-    else if (amount) car.speed += amount * (car.acceleration * 4) * clock.getDelta()
-    else {
-        if (car.speed > 0.01) car.speed -= car.acceleration * 3 * clock.getDelta()
-        else if (car.speed < -0.01) car.speed += car.acceleration * 3 * clock.getDelta()
-        else car.speed = 0
+        this.speed = 0;
+        this.acceleration = 1;
+        this.life = 5;
+        this.turn_speed = 1;
     }
 
-    if (car.speed > 2.5) car.speed = 2.5
-    else if (car.speed < -2.5) car.speed = -2.5
 
-    car.body.translateZ(car.speed)
-    car.body.updateMatrixWorld()
-}
+    move(amount, deltaTime) {
 
-function rotate(car, amount, clock) {
+        if (this.speed * amount > 0) this.speed += amount * this.acceleration * deltaTime
+        else if (amount) this.speed += amount * (this.acceleration * 4) * deltaTime
+        else {
+            if (this.speed > 0.01) this.speed -= this.acceleration * 3 * deltaTime
+            else if (this.speed < -0.01) this.speed += this.acceleration * 3 * deltaTime
+            else this.speed = 0
+        }
 
-    const rot = car.turn_speed * amount * clock.getDelta()
-    car.body.rotateY(rot)
-    car.body.updateMatrixWorld()
-}
+        if (this.speed > 2.5) this.speed = 2.5
+        else if (this.speed < -2.5) this.speed = -2.5
+        this.translateZ(amount)
+        //this.updateMatrixWorld()
+    }
 
-function reset(car) {
-    car.life = 5
-    car.body.position.set(0, 0, 0)
-    car.body.rotation.set(0, 0, 0)
-}
+    rotate(amount, deltaTime) {
 
-export default {
-    createCar,
-    move,
-    rotate,
-    reset
+        const rot = this.turn_speed * amount * deltaTime
+        this.rotateY(rot)
+        //this.updateMatrixWorld()
+    }
+
+    reset() {
+        this.life = 5
+        this.position.set(0, 0, 0)
+        this.rotation.set(0, 0, 0)
+    }
+
+    onUpdate(deltaTime) {
+        this.move(this.moving, deltaTime);
+        this.rotate(this.rotating, deltaTime);
+    }
 }

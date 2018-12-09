@@ -7,7 +7,7 @@ export class ParticleSystem {
 
         this.emitter.rate = new Proton.Rate(new Proton.Span(100, 150), new Proton.Span(.4, 1))
         this.emitter.addInitialize(new Proton.Mass(1))
-        this.emitter.addInitialize(new Proton.Radius(new Proton.Span(10, 20)))
+        this.emitter.addInitialize(new Proton.Radius(new Proton.Span(0.5, 1)))
 
         this.proton_position = new Proton.Position()
         this.proton_position.addZone(new Proton.BoxZone(400, 100, 400))
