@@ -1,6 +1,6 @@
 function loadObject(mtl_path, obj_path, castShadow, receiveShadow) {
 
-    let object = new THREE.Object3D()
+    let object = new THREE.Group()
     let mtlLoader = new THREE.MTLLoader()
     let objLoader = new THREE.OBJLoader()
 

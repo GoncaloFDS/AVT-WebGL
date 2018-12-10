@@ -3,16 +3,18 @@ import loader from "./loader.js"
 import Car from "./car.js"
 import Lights from "./light.js"
 import ParticleSystem from "./particles.js"
+import Butters from "./butters.js"
+import Orange from "./orange.js"
 
 let currentCamera, scene, renderer, clock
 let followCamera, orthoCamera, topCamera
 let controls
 let worldWidth = 1400
 let worldHeight = 700
-let lights
+let lights, sun
 let stats
 let particles
-let car, cheerios, butters, table
+let car, cheerios, butters, table, oranges
 
 function init() {
     //Scene
@@ -70,40 +72,29 @@ function createScene() {
     table.name = "Table"
     scene.add(table)
 
+    oranges = new THREE.Group()
+
+    for (let i = 0; i < 10; i++) {
+        oranges.add(new Orange())
+    }
+    scene.add(oranges)
+
     //Butters
-    butters = new THREE.Group()
-
-    let butter = loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
-    butter.position.set(200, 2, 50)
-    butter.rotateY(Math.PI / 2)
-    butter.name = "Butter_0"
-    butters.add(butter)
-
-    butter = loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
-    butter.position.set(-200, 2, 50)
-    butter.rotateY(Math.PI / 2)
-    butter.name = "Butter_1"
-    butters.add(butter)
-
-    butter = loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
-    butter.position.set(0, 2, -200)
-    butter.rotateY(Math.PI / 2)
-    butter.name = "Butter_2"
-    butters.add(butter)
-
+    butters = new Butters()
     scene.add(butters)
 
     //Cheerios
     cheerios = new THREE.Group()
 
-    for (let i = 0; i < 100; i++) {
-        const angle = 3.6 * i;
-        const x = 300 * Math.cos(angle)
-        const z = 300 * Math.sin(angle)
+    for (let i = 0; i < 60; i++) {
+        const angle = 6 * i;
+        const x = 350 * Math.cos(angle * Math.PI / 180)
+        const z = 350 * Math.sin(angle * Math.PI / 180)
 
         const cheerio = loader.loadObject("../models/cheerio/cheerio.mtl", "../models/cheerio/cheerio.obj", true, false)
-        cheerio.position.set(x, 1, z)
+        cheerio.position.set(x, 1.5, z)
         cheerio.name = "Cheerio_" + i
+        cheerio.scale.set(3, 3, 3)
         cheerios.add(cheerio)
     }
 
@@ -114,8 +105,8 @@ function createScene() {
 }
 
 function createCameras() {
-    followCamera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 0.1, 100000);
-    followCamera.position.set(0, 20, -30)
+    followCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100000)
+    followCamera.position.set(0, 10, -30)
     followCamera.lookAt(car.position)
     car.add(followCamera);
     const orthoCamera = new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2, window.innerHeight / 2, window.innerHeight / -2, 0.1, 100000);
@@ -126,14 +117,23 @@ function createCameras() {
 }
 
 function gameLoop() {
-    car.onUpdate(clock.getDelta())
+
+    car.onUpdate(clock.getDelta(), oranges, butters, cheerios, lights.lamps)
     controls.target = car.position
     controls.object = currentCamera
-    controls.update();
+    controls.update()
+
+    lights.onUpdate(car, currentCamera)
+
+    oranges.traverse(node => {
+        if (node instanceof Orange) {
+            node.move()
+        }
+    })
+    butters.onUpdate(clock.getDelta())
+    particles.OnUpdate()
 
     stats.update()
-    controls.update()
-    particles.OnUpdate()
 
     render();
     requestAnimationFrame(gameLoop)

@@ -1,14 +1,16 @@
 'use strict'
 
 import loader from "./loader.js"
+import Orange from "./orange.js"
+import Billboard from "./billboard.js";
 
-export default class Car extends THREE.Group{
+export default class Car extends THREE.Group {
     constructor() {
         super()
 
         //Right SpotLight
-        this.spotLightR = new THREE.SpotLight(0xffffff, 2)
-        this.spotLightR.decay = 2
+        this.spotLightR = new THREE.SpotLight(0xffffff, 0.8)
+        this.spotLightR.decay = 30
         this.spotLightR.penumbra = 0.65
         this.spotLightR.castShadow = true
         this.spotLightR.shadow.camera.fov = 30
@@ -22,8 +24,8 @@ export default class Car extends THREE.Group{
         this.spotLightR.name = "SpotLightR"
 
         //Left SpotLight
-        this.spotLightL = new THREE.SpotLight(0xffffff, 2)
-        this.spotLightL.decay = 2
+        this.spotLightL = new THREE.SpotLight(0xffffff, 0.8)
+        this.spotLightL.decay = 30
         this.spotLightL.penumbra = 0.65
         this.spotLightL.castShadow = true
         this.spotLightL.shadow.camera.fov = 30
@@ -76,8 +78,7 @@ export default class Car extends THREE.Group{
         this.rotating = 0
     }
 
-
-    move(amount, deltaTime) {
+    move(amount, deltaTime, oranges, butters, cheerios, lamps) {
 
         if (this.speed * amount > 0) this.speed += amount * this.acceleration * deltaTime
         else if (amount) this.speed += amount * (this.acceleration * 4) * deltaTime
@@ -89,7 +90,20 @@ export default class Car extends THREE.Group{
 
         if (this.speed > 2.5) this.speed = 2.5
         else if (this.speed < -2.5) this.speed = -2.5
-        this.translateZ(amount)
+
+
+        if (!(this.collisionDetection(oranges, butters, deltaTime, new THREE.Vector3(0, 0, amount), cheerios, lamps))) {
+
+            this.translateZ(amount)
+            this.wheels[0].rotateX(amount / 5)
+            this.wheels[1].rotateX(amount / 5)
+            this.wheels[2].rotateX(amount / 5)
+            this.wheels[3].rotateX(amount / 5)
+        }
+
+        if (this.position.distanceTo(new THREE.Vector3(0, 0, 0)) > 360) {
+            this.translateZ(-2 * amount)
+        }
     }
 
     rotate(amount, deltaTime) {
@@ -104,8 +118,68 @@ export default class Car extends THREE.Group{
         this.rotation.set(0, 0, 0)
     }
 
-    onUpdate(deltaTime) {
-        this.move(this.moving, deltaTime);
-        this.rotate(this.rotating, deltaTime);
+    onUpdate(deltaTime, oranges, butters, cheerios, lamps) {
+        this.move(this.moving, deltaTime, oranges, butters, cheerios, lamps)
+        this.rotate(this.rotating, deltaTime)
+    }
+
+    collisionDetection(oranges, butters, deltaTime, newPos, cheerios, lamps) {
+
+        let boxCar = new THREE.Box3().setFromObject(this.model)
+        boxCar.translate(newPos)
+        let collision = false
+
+        oranges.traverse(node => {
+            if (node instanceof Orange && this.position.distanceTo(node.position) < 20) {
+                let box = new THREE.Box3().setFromObject(node)
+
+                if (boxCar.intersectsBox(box)) {
+                    this.reset()
+                    this.life--
+                        collision = true
+                }
+            }
+        })
+
+        butters.models.forEach(element => {
+            let box = new THREE.Box3().setFromObject(element.model)
+
+            if (boxCar.intersectsBox(box)) {
+
+                element.speed = this.speed * 5
+                element.direction = this.getWorldDirection()
+
+                let temp = element.direction.x
+                element.direction.x = -element.direction.z
+                element.direction.z = temp
+                collision = true
+            }
+        })
+                butters.onUpdate(deltaTime)
+
+        cheerios.children.forEach(element => {
+
+            if (this.position.distanceTo(element.position) < 20) {
+                let box = new THREE.Box3().setFromObject(element)
+
+                if (boxCar.intersectsBox(box)) {
+                    element.translateOnAxis(this.getWorldDirection(), 2 * this.moving)
+                    collision = true
+                }
+            }
+        })
+
+         lamps.traverse(node => {
+            if (node instanceof Billboard && this.position.distanceTo(node.position) < 100) {
+
+                let pos = new THREE.Vector3(node.position.x, boxCar.getCenter().y, node.position.z)
+
+                if (!boxCar.distanceToPoint(pos)) {
+                    collision = true
+                }
+            }
+        })
+
+        return collision
     }
 }
