@@ -15,7 +15,7 @@ function init() {
     //Scene
     scene = new THREE.Scene()
     scene.background = new THREE.Color(0x0)
-    scene.fog = new THREE.FogExp2(0xaaaaaa, 0.005)
+    scene.fog = new THREE.FogExp2(0xaaaaaa, 0.015)
 
     //Clock
     clock = new THREE.Clock()

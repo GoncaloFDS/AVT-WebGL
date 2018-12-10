@@ -51,7 +51,13 @@
         animate();
 
         function init() {
-            renderer = new THREE.WebGLRenderer();
+            renderer = new THREE.WebGLRenderer({
+                
+            });
+            renderer.gammaOutput = true
+            renderer.shadowMap.enabled = true
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap
+            renderer.setClearColor(0xa4a4a4, 1)
             element = renderer.domElement;
             container = document.getElementById('scene');
             container.appendChild(element);
@@ -59,9 +65,10 @@
             effect = new THREE.StereoEffect(renderer);
 
             scene = new THREE.Scene();
-
+            scene.fog = new THREE.FogExp2(0xaaaaaa, 0.005)
+            
             camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
-            camera.position.set(0, 10, 0);
+            camera.position.set(2, 15, 0);
             scene.add(camera);
 
             controls = new THREE.OrbitControls(camera, element);
@@ -88,10 +95,6 @@
                 window.removeEventListener('deviceorientation', setOrientationControls, true);
             }
             window.addEventListener('deviceorientation', setOrientationControls, true);
-
-
-            var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
-            scene.add(light);
             
             createScene();
            
@@ -105,6 +108,7 @@
 
             //Car
             car = new Car()
+            car.add(camera);
             scene.add(car)
 
             //Table
@@ -158,10 +162,21 @@
 
         function update(dt) {
             resize();
-
             camera.updateProjectionMatrix();
-
             controls.update(dt);
+
+            lights.onUpdate(car, camera)
+
+            oranges.traverse(node => {
+                if (node instanceof Orange) {
+                    node.move()
+                }
+            })
+            butters.onUpdate(dt)
+            particles.OnUpdate()
+
+            car.move(1, dt, oranges, butters, cheerios, lights.lamps)
+            car.rotate(-1, dt)
         }
 
         function render(dt) {

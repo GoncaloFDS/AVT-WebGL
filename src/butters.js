@@ -8,7 +8,7 @@ class Butters extends THREE.Group {
         this.models = []
 
         let butter = loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
-        butter.position.set(200, 2, 50)
+        butter.position.set(200, 6, 50)
         butter.rotateY(Math.PI / 2)
         butter.name = "Butter_0"
         this.models.push({
@@ -18,7 +18,7 @@ class Butters extends THREE.Group {
         this.add(butter)
 
         butter = loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
-        butter.position.set(-200, 2, 50)
+        butter.position.set(-200, 6, 50)
         butter.rotateY(Math.PI / 2)
         butter.name = "Butter_1"
         this.models.push({
@@ -29,7 +29,7 @@ class Butters extends THREE.Group {
         this.add(butter)
 
         butter = loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
-        butter.position.set(0, 2, -200)
+        butter.position.set(0, 6, -200)
         butter.rotateY(Math.PI / 2)
         butter.name = "Butter_2"
         this.models.push({

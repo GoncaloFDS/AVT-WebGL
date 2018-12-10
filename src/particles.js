@@ -18,7 +18,7 @@ class ParticleSystem {
         this.emitter.addBehaviour(new Proton.RandomDrift(10, 1, 10, .05))
         this.emitter.addBehaviour(new Proton.Rotate("random", "random"))
         this.emitter.addBehaviour(new Proton.Gravity(0.3))
-        this.emitter.addBehaviour(new Proton.Color('random'))
+        this.emitter.addBehaviour(new Proton.Color(new THREE.Color()))
 
         this.camera =  new THREE.OrthographicCamera(-500, 500, 100, -100, 5, 1000)
         this.camera.position.z = 100

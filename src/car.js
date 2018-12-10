@@ -67,9 +67,10 @@ class Car extends THREE.Group {
         this.model.scale.set(0.05, 0.05, 0.05)
 
         this.speed = 0
+        this.maxSpeed = 0.5
         this.acceleration = 0.1
         this.life = 5
-        this.turn_speed = 1
+        this.turn_speed = 0.5
         this.moving = 0
         this.rotating = 0
     }
@@ -84,22 +85,21 @@ class Car extends THREE.Group {
             else this.speed = 0
         }
 
-        if (this.speed > 2.5) this.speed = 2.5
-        else if (this.speed < -2.5) this.speed = -2.5
-
+        if (this.speed >= this.maxSpeed) this.speed = this.maxSpeed
+        else if (this.speed <= -this.maxSpeed) this.speed = -this.maxSpeed
 
         if (!(this.collisionDetection(oranges, butters, deltaTime, new THREE.Vector3(0, 0, amount), cheerios, lamps))) {
 
-            this.translateZ(amount)
+            this.translateZ(this.speed)
             this.wheels[0].rotateX(-amount / 5)
             this.wheels[1].rotateX(-amount / 5)
             this.wheels[2].rotateX(-amount / 5)
             this.wheels[3].rotateX(-amount / 5)
         }
 
-        if (this.position.distanceTo(new THREE.Vector3(0, 0, 0)) > 360) {
-            this.translateZ(-2 * amount)
-        }
+        //if (this.position.distanceTo(new THREE.Vector3(0, 0, 0)) > 360) {
+        //    this.translateZ(-2 * amount)
+        //}
     }
 
     rotate(amount, deltaTime) {
@@ -112,6 +112,7 @@ class Car extends THREE.Group {
         this.life = 5
         this.position.set(0, 0, 0)
         this.rotation.set(0, 0, 0)
+        this.speed = 0
     }
 
     onUpdate(deltaTime, oranges, butters, cheerios, lamps) {
