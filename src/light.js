@@ -1,8 +1,6 @@
 'use strict'
 
-import Billboard from "./billboard.js";
-
-export default class Lights extends THREE.Group {
+class Lights extends THREE.Group {
     constructor() {
         super()
 

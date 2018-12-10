@@ -1,30 +1,191 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <title>MicroMachines</title>
-    <script src="lib/three.min.js"></script>
-    <script src="lib/js/controls/OrbitControls.js"></script>
-    <script src="lib/js/loaders/OBJLoader.js"></script>
-    <script src="lib/js/loaders/MTLLoader.js"></script>
-    <script src="lib/js/objects/Lensflare.js"></script>
-    <script src="lib/js/libs/stats.min.js"></script>
-    <script src="lib/proton/three.proton.min.js"></script>
-    <script type="module" src="src/light.js"></script>
-    <script type="module" src="src/particles.js"></script>
-    <script type="module" src="src/loader.js"></script>
-    <script type="module" src="src/car.js"></script>
-    <script type="module" src="src/application.js"></script>
+    <title>Micro Machines</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        #scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+    </style>
 </head>
 
 <body>
-    <script type="module">
-        import application from "./src/application.js" 
+    <div id="scene"></div>
 
-        application.init() 
-        application.gameLoop()
+    <script src="lib/three.js"></script>
+    <script src="lib/proton/three.proton.min.js"></script>
+    <script src="lib/StereoEffect.js"></script>
+    <script src="lib/DeviceOrientationControls.js"></script>
+    <script src="lib/OrbitControls.js"></script>
+    <script src="lib/loaders/OBJLoader.js"></script>
+    <script src="lib/loaders/MTLLoader.js"></script>
+    <script src="lib/objects/Lensflare.js"></script>
+    <script src="src/loader.js"></script>
+    <script src="src/billboard.js"></script>
+    <script src="src/light.js"></script>
+    <script src="src/particles.js"></script>
+    <script src="src/car.js"></script>
+    <script src="src/orange.js"></script>
+    <script src="src/butters.js"></script>
+   
+    <script>
+        var camera, scene, renderer;
+        var effect, controls;
+        var element, container;
 
+        var clock = new THREE.Clock();
+
+        init();
+        animate();
+
+        function init() {
+            renderer = new THREE.WebGLRenderer();
+            element = renderer.domElement;
+            container = document.getElementById('scene');
+            container.appendChild(element);
+
+            effect = new THREE.StereoEffect(renderer);
+
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
+            camera.position.set(0, 10, 0);
+            scene.add(camera);
+
+            controls = new THREE.OrbitControls(camera, element);
+            controls.rotateUp(Math.PI / 4);
+            controls.target.set(
+                camera.position.x + 0.1,
+                camera.position.y,
+                camera.position.z
+            );
+            controls.noZoom = true;
+            controls.noPan = true;
+
+            function setOrientationControls(e) {
+                if (!e.alpha) {
+                    return;
+                }
+
+                controls = new THREE.DeviceOrientationControls(camera, true);
+                controls.connect();
+                controls.update();
+
+                element.addEventListener('click', fullscreen, false);
+
+                window.removeEventListener('deviceorientation', setOrientationControls, true);
+            }
+            window.addEventListener('deviceorientation', setOrientationControls, true);
+
+
+            var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
+            scene.add(light);
+            
+            createScene();
+           
+            window.addEventListener('resize', resize, false);
+            setTimeout(resize, 1);
+        }
+
+        function createScene(){
+            lights = new Lights()
+            scene.add(lights)
+
+            //Car
+            car = new Car()
+            scene.add(car)
+
+            //Table
+            table = loadObject("../models/table/table.mtl", "../models/table/table.obj", false, true)
+            table.scale.set(5, 5, 5)
+            table.name = "Table"
+            scene.add(table)
+
+            oranges = new THREE.Group()
+
+            for (let i = 0; i < 10; i++) {
+                oranges.add(new Orange())
+            }
+            scene.add(oranges)
+
+            //Butters
+            butters = new Butters()
+            scene.add(butters)
+
+            //Cheerios
+            cheerios = new THREE.Group()
+
+            for (let i = 0; i < 60; i++) {
+                const angle = 6 * i;
+                const x = 350 * Math.cos(angle * Math.PI / 180)
+                const z = 350 * Math.sin(angle * Math.PI / 180)
+
+                const cheerio = loadObject("../models/cheerio/cheerio.mtl", "../models/cheerio/cheerio.obj", true, false)
+                cheerio.position.set(x, 1.5, z)
+                cheerio.name = "Cheerio_" + i
+                cheerio.scale.set(3, 3, 3)
+                cheerios.add(cheerio)
+            }
+
+            scene.add(cheerios)
+
+            //Particle System
+            particles = new ParticleSystem(renderer, scene, camera)
+        }
+
+        function resize() {
+            var width = container.offsetWidth;
+            var height = container.offsetHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(width, height);
+            effect.setSize(width, height);
+        }
+
+        function update(dt) {
+            resize();
+
+            camera.updateProjectionMatrix();
+
+            controls.update(dt);
+        }
+
+        function render(dt) {
+            effect.render(scene, camera);
+        }
+
+        function animate(t) {
+            requestAnimationFrame(animate);
+
+            update(clock.getDelta());
+            render(clock.getDelta());
+        }
+
+        function fullscreen() {
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.msRequestFullscreen) {
+                container.msRequestFullscreen();
+            } else if (container.mozRequestFullScreen) {
+                container.mozRequestFullScreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            }
+        }
     </script>
 </body>
 

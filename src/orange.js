@@ -1,12 +1,10 @@
 'use strict'
 
-import loader from "./loader.js"
-
-export default class Orange extends THREE.Object3D {
+class Orange extends THREE.Object3D {
     constructor() {
         super()
 
-        this.model = loader.loadObject("../models/Orange/orange.mtl", "../models/Orange/orange.obj", true, true)
+        this.model = loadObject("../models/Orange/orange.mtl", "../models/Orange/orange.obj", true, true)
         this.add(this.model)
         this.name = "Orange"
         this.rotateSpeed = 0.1

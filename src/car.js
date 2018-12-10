@@ -1,10 +1,6 @@
 'use strict'
 
-import loader from "./loader.js"
-import Orange from "./orange.js"
-import Billboard from "./billboard.js";
-
-export default class Car extends THREE.Group {
+class Car extends THREE.Group {
     constructor() {
         super()
 
@@ -40,26 +36,26 @@ export default class Car extends THREE.Group {
 
         //Car Wheels
         this.wheels = []
-        this.wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
+        this.wheels.push(loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
         this.wheels[0].name = "WheelRF"
         this.wheels[0].position.set(-85.429, 34.599, 128.173)
         this.wheels[0].rotation.y = Math.PI
 
-        this.wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
+        this.wheels.push(loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
         this.wheels[1].name = "WheelLF"
         this.wheels[1].position.set(85.429, 34.599, 128.173)
 
-        this.wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
+        this.wheels.push(loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
         this.wheels[2].name = "WheelRB"
         this.wheels[2].position.set(-85.429, 36.416, -146.734)
         this.wheels[2].rotation.y = Math.PI
 
-        this.wheels.push(loader.loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
+        this.wheels.push(loadObject("../models/Lamborginhi/Wheel.mtl", "../models/Lamborginhi/Wheel.obj", true, false))
         this.wheels[3].name = "WheelLB"
         this.wheels[3].position.set(85.429, 36.416, -146.734)
 
         //Car Body
-        this.model = loader.loadObject("../models/Lamborginhi/Body.mtl", "../models/Lamborginhi/Body.obj", true, true)
+        this.model = loadObject("../models/Lamborginhi/Body.mtl", "../models/Lamborginhi/Body.obj", true, true)
         this.add(this.model);
         this.model.add(this.wheels[0])
         this.model.add(this.wheels[1])
@@ -71,7 +67,7 @@ export default class Car extends THREE.Group {
         this.model.scale.set(0.05, 0.05, 0.05)
 
         this.speed = 0
-        this.acceleration = 1
+        this.acceleration = 0.1
         this.life = 5
         this.turn_speed = 1
         this.moving = 0
@@ -81,10 +77,10 @@ export default class Car extends THREE.Group {
     move(amount, deltaTime, oranges, butters, cheerios, lamps) {
 
         if (this.speed * amount > 0) this.speed += amount * this.acceleration * deltaTime
-        else if (amount) this.speed += amount * (this.acceleration * 4) * deltaTime
+        else if (amount) this.speed += amount * (this.acceleration) * deltaTime
         else {
-            if (this.speed > 0.01) this.speed -= this.acceleration * 3 * deltaTime
-            else if (this.speed < -0.01) this.speed += this.acceleration * 3 * deltaTime
+            if (this.speed > 0.01) this.speed -= this.acceleration * deltaTime
+            else if (this.speed < -0.01) this.speed += this.acceleration * deltaTime
             else this.speed = 0
         }
 
@@ -95,10 +91,10 @@ export default class Car extends THREE.Group {
         if (!(this.collisionDetection(oranges, butters, deltaTime, new THREE.Vector3(0, 0, amount), cheerios, lamps))) {
 
             this.translateZ(amount)
-            this.wheels[0].rotateX(amount / 5)
-            this.wheels[1].rotateX(amount / 5)
-            this.wheels[2].rotateX(amount / 5)
-            this.wheels[3].rotateX(amount / 5)
+            this.wheels[0].rotateX(-amount / 5)
+            this.wheels[1].rotateX(-amount / 5)
+            this.wheels[2].rotateX(-amount / 5)
+            this.wheels[3].rotateX(-amount / 5)
         }
 
         if (this.position.distanceTo(new THREE.Vector3(0, 0, 0)) > 360) {

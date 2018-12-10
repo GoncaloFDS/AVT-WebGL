@@ -1,6 +1,5 @@
 'use strict'
-
-export  default class Billboard extends THREE.Object3D{
+class Billboard extends THREE.Object3D{
     constructor(texture){
 
         super()

@@ -29,7 +29,3 @@ function loadObject(mtl_path, obj_path, castShadow, receiveShadow) {
 
     return object
 }
-
-export default {
-    loadObject
-}

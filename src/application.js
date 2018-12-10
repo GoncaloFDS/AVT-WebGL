@@ -1,10 +1,5 @@
 'use strict'
 import loader from "./loader.js"
-import Car from "./car.js"
-import Lights from "./light.js"
-import ParticleSystem from "./particles.js"
-import Butters from "./butters.js"
-import Orange from "./orange.js"
 
 let currentCamera, scene, renderer, clock
 let followCamera, orthoCamera, topCamera
@@ -20,7 +15,7 @@ function init() {
     //Scene
     scene = new THREE.Scene()
     scene.background = new THREE.Color(0x0)
-    scene.fog = new THREE.FogExp2(0xaaaaaa, 0.015)
+    scene.fog = new THREE.FogExp2(0xaaaaaa, 0.005)
 
     //Clock
     clock = new THREE.Clock()
@@ -36,7 +31,9 @@ function init() {
     renderer.shadowMap.enabled = true
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     document.body.appendChild(renderer.domElement)
-
+    document.body.appendChild(WEBVR.createButton(renderer));
+    renderer.vr.enabled = true;
+    renderer.setAnimationLoop(gameLoop);
     createScene();
     createCameras();
 
@@ -136,7 +133,7 @@ function gameLoop() {
     stats.update()
 
     render();
-    requestAnimationFrame(gameLoop)
+    //requestAnimationFrame(gameLoop)
 }
 
 function render() {
@@ -231,9 +228,4 @@ function onResize(event) {
         currentCamera.aspect = aspectRatio;
         currentCamera.updateProjectionMatrix();
     }
-}
-
-export default {
-    init,
-    gameLoop
 }

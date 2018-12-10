@@ -1,5 +1,5 @@
 //Particle System
-export default class ParticleSystem {
+class ParticleSystem {
     constructor(renderer, scene, camera) {
 
         this.proton = new Proton()

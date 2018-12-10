@@ -1,15 +1,13 @@
 'use strict'
 
-import loader from './loader.js'
-
-export default class Butters extends THREE.Group {
+class Butters extends THREE.Group {
     constructor() {
 
         super()
 
         this.models = []
 
-        let butter = loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
+        let butter = loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
         butter.position.set(200, 2, 50)
         butter.rotateY(Math.PI / 2)
         butter.name = "Butter_0"
@@ -19,7 +17,7 @@ export default class Butters extends THREE.Group {
         })
         this.add(butter)
 
-        butter = loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
+        butter = loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
         butter.position.set(-200, 2, 50)
         butter.rotateY(Math.PI / 2)
         butter.name = "Butter_1"
@@ -30,7 +28,7 @@ export default class Butters extends THREE.Group {
         })
         this.add(butter)
 
-        butter = loader.loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
+        butter = loadObject("../models/butter/butter.mtl", "../models/butter/butter.obj", true, false)
         butter.position.set(0, 2, -200)
         butter.rotateY(Math.PI / 2)
         butter.name = "Butter_2"
