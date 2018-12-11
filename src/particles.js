@@ -5,7 +5,7 @@ class ParticleSystem {
         this.proton = new Proton()
         this.emitter = new Proton.Emitter()
 
-        this.emitter.rate = new Proton.Rate(new Proton.Span(100, 150), new Proton.Span(.4, 1))
+        this.emitter.rate = new Proton.Rate(new Proton.Span(50, 70), new Proton.Span(.4, 1))
         this.emitter.addInitialize(new Proton.Mass(1))
         this.emitter.addInitialize(new Proton.Radius(new Proton.Span(0.5, 1)))
 

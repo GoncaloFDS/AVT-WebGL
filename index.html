@@ -32,6 +32,7 @@
     <script src="lib/loaders/OBJLoader.js"></script>
     <script src="lib/loaders/MTLLoader.js"></script>
     <script src="lib/objects/Lensflare.js"></script>
+    <script src="lib/objects/Reflector.js"></script>
     <script src="src/loader.js"></script>
     <script src="src/billboard.js"></script>
     <script src="src/light.js"></script>
@@ -39,11 +40,56 @@
     <script src="src/car.js"></script>
     <script src="src/orange.js"></script>
     <script src="src/butters.js"></script>
+
+    <script type="x-shader/x-vertex" id="vertexShader">
+        attribute vec4 tangent;
+
+        varying vec2 vUv;
+        varying mat3 tbn;
+        varying vec3 vLightVector;
+
+        uniform vec3 lightPosition;
+
+        void main(){
+            vUv = uv;
+
+            vec3 vNormal = normalize(normalMatrix * normal);
+            vec3 vTangent = normalize(normalMatrix * tangent.xyz);
+            vec3 vBinormal = normalize(cross(vNormal, vTangent) * tangent.w);
+
+            tbn = mat3(vTangent, vBinormal, vNormal);
+
+            vec4 lightVector = viewMatrix * vec4(lightPosition, 1.0);
+            vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+            vLightVector = normalize(lightVector.xyz - modelViewPosition.xyz);
+
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    </script>
+    <script type="x-shader/x-fragment" id="fragmentShader">
+        uniform sampler2D diffuseMap;
+        uniform sampler2D bumpMap;
+       
+        varying vec2 vUv;
+        varying mat3 tbn;
+        varying vec3 vLightVector;
+
+        void main(){
+            vec3 normalCoordinate = texture2D(bumpMap, vUv).xyz;
+            vec3 normal = (tbn * normalCoordinate.rgb);
+            //vec3 normal = texture2D(bumpMap, vUv).xyz;
+            float intensity = max(0.5, dot(normal, vLightVector));
+            vec4 lighting = vec4(intensity, intensity, intensity, 1.0);
+
+            gl_FragColor = texture2D(diffuseMap, vUv) * lighting;
+        }
+    </script>
    
     <script>
         var camera, scene, renderer;
         var effect, controls;
         var element, container;
+        var uniforms;
 
         var clock = new THREE.Clock();
 
@@ -67,7 +113,7 @@
             scene = new THREE.Scene();
             scene.fog = new THREE.FogExp2(0xaaaaaa, 0.005)
             
-            camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
+            camera = new THREE.PerspectiveCamera(90, 1, 1, 700);
             camera.position.set(2, 15, 0);
             scene.add(camera);
 
@@ -105,6 +151,26 @@
         function createScene(){
             lights = new Lights()
             scene.add(lights)
+            
+            var textureLoader = new THREE.TextureLoader();
+            var crateDiffTex = new textureLoader.load("models/crate/crate0_diffuse.png");
+            var crateNormalTex = new textureLoader.load("models/crate/crate0_normal.png"); 
+            var crateBumpTex = new textureLoader.load("models/crate/crate0_bump.png");
+            uniforms = {
+                diffuseMap: {type: "t", value:  crateDiffTex},
+                bumpMap: { type: "t", value: crateNormalTex },
+                lightPosition: { type: 'v3', value: new THREE.Vector3(0, 25, 0) },
+            }
+            var crateMaterial = new THREE.ShaderMaterial({
+                vertexShader: document.getElementById('vertexShader').textContent,
+                fragmentShader: document.getElementById('fragmentShader').textContent,
+                uniforms: uniforms,
+            });
+            
+            var crateGeometry = new THREE.BoxBufferGeometry(10, 10, 10);
+            var crate = new THREE.Mesh(crateGeometry, crateMaterial);
+            crate.position.set(100, 5, 0);
+            scene.add(crate);
 
             //Car
             car = new Car()
@@ -116,6 +182,18 @@
             table.scale.set(5, 5, 5)
             table.name = "Table"
             scene.add(table)
+            
+            var mirrorGeometry = new THREE.CircleBufferGeometry(40, 64);
+            var groundMirror = new THREE.Reflector(mirrorGeometry, {
+                clipBias: 0.003,
+                textureWidth: window.innerWidth * window.devicePixelRatio,
+                textureHeight: window.innerHeight * window.devicePixelRatio,
+                color: 0x777777,
+                recursion: 1
+            });
+            groundMirror.position.y = 0.5;
+            groundMirror.rotateX(- Math.PI / 2);
+            scene.add(groundMirror);
 
             oranges = new THREE.Group()
 
