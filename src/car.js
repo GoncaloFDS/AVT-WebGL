@@ -70,7 +70,7 @@ class Car extends THREE.Group {
         this.maxSpeed = 0.5
         this.acceleration = 0.1
         this.life = 5
-        this.turn_speed = 0.5
+        this.turn_speed = 0.1
         this.moving = 0
         this.rotating = 0
     }
@@ -144,7 +144,7 @@ class Car extends THREE.Group {
             if (boxCar.intersectsBox(box)) {
 
                 element.speed = this.speed * 5
-                element.direction = this.getWorldDirection()
+                element.direction = this.getWorldDirection(element.direction)
 
                 let temp = element.direction.x
                 element.direction.x = -element.direction.z
@@ -160,7 +160,8 @@ class Car extends THREE.Group {
                 let box = new THREE.Box3().setFromObject(element)
 
                 if (boxCar.intersectsBox(box)) {
-                    element.translateOnAxis(this.getWorldDirection(), 2 * this.moving)
+                    var d = this.getWorldDirection(d);
+                    element.translateOnAxis(d, 2 * this.moving)
                     collision = true
                 }
             }

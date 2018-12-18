@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Micro Machines</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+        body {
+            margin: 0px;
+            overflow: hidden;
+        }
+
+        #scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="scene"></div>
+
+    <script src="lib/three.js"></script>
+    <script src="lib/proton/three.proton.min.js"></script>
+    <script src="lib/StereoEffect.js"></script>
+    <script src="lib/DeviceOrientationControls.js"></script>
+    <script src="lib/OrbitControls.js"></script>
+    <script src="lib/loaders/OBJLoader.js"></script>
+    <script src="lib/loaders/MTLLoader.js"></script>
+    <script src="lib/objects/Lensflare.js"></script>
+    <script src="lib/objects/Reflector.js"></script>
+    <script src="src/loader.js"></script>
+    <script src="src/billboard.js"></script>
+    <script src="src/light.js"></script>
+    <script src="src/particles.js"></script>
+    <script src="src/car.js"></script>
+    <script src="src/orange.js"></script>
+    <script src="src/butters.js"></script>
+
+    <script type="x-shader/x-vertex" id="vertexShader">
+        attribute vec4 tangent;
+
+        varying vec2 vUv;
+        varying mat3 tbn;
+        varying vec3 vLightVector;
+
+        uniform vec3 lightPosition;
+
+        void main(){
+            vUv = uv;
+
+            vec3 vNormal = normalize(normalMatrix * normal);
+            vec3 vTangent = normalize(normalMatrix * tangent.xyz);
+            vec3 vBinormal = normalize(cross(vNormal, vTangent) * tangent.w);
+
+            tbn = mat3(vTangent, vBinormal, vNormal);
+
+            vec4 lightVector = viewMatrix * vec4(lightPosition, 1.0);
+            vec4 modelViewPosition = modelViewMatrix * vec4(position, 1.0);
+            vLightVector = normalize(lightVector.xyz - modelViewPosition.xyz);
+
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    </script>
+    <script type="x-shader/x-fragment" id="fragmentShader">
+        uniform sampler2D diffuseMap;
+        uniform sampler2D bumpMap;
+       
+        varying vec2 vUv;
+        varying mat3 tbn;
+        varying vec3 vLightVector;
+
+        void main(){
+            vec3 normalCoordinate = texture2D(bumpMap, vUv).xyz;
+            vec3 normal = (tbn * normalCoordinate.rgb);
+            //vec3 normal = texture2D(bumpMap, vUv).xyz;
+            float intensity = max(0.5, dot(normal, vLightVector));
+            vec4 lighting = vec4(intensity, intensity, intensity, 1.0);
+
+            gl_FragColor = texture2D(diffuseMap, vUv) * lighting;
+        }
+    </script>
+   
+    <script>
+        var camera, scene, renderer;
+        var effect, controls;
+        var element, container;
+        var uniforms;
+
+        var clock = new THREE.Clock();
+
+        init();
+        animate();
+
+        function init() {
+            renderer = new THREE.WebGLRenderer({
+                
+            });
+            renderer.gammaOutput = true
+            renderer.shadowMap.enabled = true
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap
+            renderer.setClearColor(0xa4a4a4, 1)
+            element = renderer.domElement;
+            container = document.getElementById('scene');
+            container.appendChild(element);
+
+            effect = new THREE.StereoEffect(renderer);
+
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0xaaaaaa, 0.005)
+            
+            camera = new THREE.PerspectiveCamera(90, 1, 1, 700);
+            camera.position.set(0, 15, -10);
+            scene.add(camera);
+
+            controls = new THREE.OrbitControls(camera, element);
+            controls.rotateUp(Math.PI / 4);
+            controls.noZoom = true;
+            controls.noPan = true;
+            
+           
+            
+            createScene();
+            controls.target = car.position
+            window.addEventListener("keydown", onKeyDown);
+            window.addEventListener("keyup", onKeyUp);
+            window.addEventListener('resize', resize, false);
+            setTimeout(resize, 1);
+        }
+
+        function createScene(){
+            lights = new Lights()
+            scene.add(lights)
+            
+            var textureLoader = new THREE.TextureLoader();
+            var crateDiffTex = new textureLoader.load("models/crate/crate0_diffuse.png");
+            var crateNormalTex = new textureLoader.load("models/crate/crate0_normal.png"); 
+            var crateBumpTex = new textureLoader.load("models/crate/crate0_bump.png");
+            uniforms = {
+                diffuseMap: {type: "t", value:  crateDiffTex},
+                bumpMap: { type: "t", value: crateNormalTex },
+                lightPosition: { type: 'v3', value: new THREE.Vector3(0, 25, 0) },
+            }
+            var crateMaterial = new THREE.ShaderMaterial({
+                vertexShader: document.getElementById('vertexShader').textContent,
+                fragmentShader: document.getElementById('fragmentShader').textContent,
+                uniforms: uniforms,
+            });
+            
+            var crateGeometry = new THREE.BoxBufferGeometry(10, 10, 10);
+            var crate = new THREE.Mesh(crateGeometry, crateMaterial);
+            crate.position.set(100, 5, 0);
+            scene.add(crate);
+
+            //Car
+            car = new Car()
+            car.add(camera);
+            scene.add(car)
+
+            //Table
+            table = loadObject("../models/table/table.mtl", "../models/table/table.obj", false, true)
+            table.scale.set(5, 5, 5)
+            table.name = "Table"
+            scene.add(table)
+            
+            var mirrorGeometry = new THREE.CircleBufferGeometry(40, 64);
+            var groundMirror = new THREE.Reflector(mirrorGeometry, {
+                clipBias: 0.003,
+                textureWidth: window.innerWidth * window.devicePixelRatio,
+                textureHeight: window.innerHeight * window.devicePixelRatio,
+                color: 0x777777,
+                recursion: 1
+            });
+            groundMirror.position.y = 0.5;
+            groundMirror.rotateX(- Math.PI / 2);
+            scene.add(groundMirror);
+
+            oranges = new THREE.Group()
+
+            for (let i = 0; i < 10; i++) {
+                oranges.add(new Orange())
+            }
+            scene.add(oranges)
+
+            //Butters
+            butters = new Butters()
+            scene.add(butters)
+
+            //Cheerios
+            cheerios = new THREE.Group()
+
+            for (let i = 0; i < 60; i++) {
+                const angle = 6 * i;
+                const x = 350 * Math.cos(angle * Math.PI / 180)
+                const z = 350 * Math.sin(angle * Math.PI / 180)
+
+                const cheerio = loadObject("../models/cheerio/cheerio.mtl", "../models/cheerio/cheerio.obj", true, false)
+                cheerio.position.set(x, 1.5, z)
+                cheerio.name = "Cheerio_" + i
+                cheerio.scale.set(3, 3, 3)
+                cheerios.add(cheerio)
+            }
+
+            scene.add(cheerios)
+
+            //Particle System
+            particles = new ParticleSystem(renderer, scene, camera)
+        }
+
+        function resize() {
+            var width = container.offsetWidth;
+            var height = container.offsetHeight;
+
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(width, height);
+            effect.setSize(width, height);
+        }
+
+        function update(dt) {
+            resize();
+            camera.updateProjectionMatrix();
+            controls.update(dt);
+
+            lights.onUpdate(car, camera)
+
+            oranges.traverse(node => {
+                if (node instanceof Orange) {
+                    node.move()
+                }
+            })
+            butters.onUpdate(dt)
+            particles.OnUpdate()
+
+            //car.move(1, dt, oranges, butters, cheerios, lights.lamps)
+            //car.rotate(-1, dt)
+            car.onUpdate(dt, oranges, butters, cheerios, lights.lamps);
+        }
+
+        function render(dt) {
+            //effect.render(scene, camera);
+            renderer.render(scene, camera);
+        }
+
+        function animate(t) {
+            requestAnimationFrame(animate);
+
+            update(clock.getDelta());
+            render(clock.getDelta());
+        }
+
+        function fullscreen() {
+            if (container.requestFullscreen) {
+                container.requestFullscreen();
+            } else if (container.msRequestFullscreen) {
+                container.msRequestFullscreen();
+            } else if (container.mozRequestFullScreen) {
+                container.mozRequestFullScreen();
+            } else if (container.webkitRequestFullscreen) {
+                container.webkitRequestFullscreen();
+            }
+        }
+        function onKeyDown(event) {
+    switch (event.key) {
+        case "w":
+            car.moving = 1;
+            //car.move(1, clock.getDelta())
+            break
+        case "s":
+            car.moving = -1;
+            //car.move(-1, clock.getDelta())
+            break
+        case "a":
+            car.rotating = 1;
+            //car.rotate(1, clock.getDelta())
+            break
+        case "d":
+            car.rotating = -1;
+            //car.rotate(-1, clock.getDelta())
+            break
+        case "z":
+            car.reset()
+            break
+        default:
+            break;
+    }
+}
+
+function onKeyUp(event) {
+    switch (event.key) {
+        case "w":
+        case "s":
+            car.moving = 0;
+            break
+        case "a":
+        case "d":
+            car.rotating = 0;
+            break
+        case "z":
+            car.reset()
+            break
+        default:
+            break;
+    }
+}
+    </script>
+</body>
+
+</html>
